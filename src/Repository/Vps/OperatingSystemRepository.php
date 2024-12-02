@@ -2,6 +2,7 @@
 
 namespace Transip\Api\Library\Repository\Vps;
 
+use Psr\Http\Message\ResponseInterface;
 use Transip\Api\Library\Entity\Vps\OperatingSystem;
 use Transip\Api\Library\Repository\ApiRepository;
 use Transip\Api\Library\Repository\VpsRepository;
@@ -10,6 +11,9 @@ class OperatingSystemRepository extends ApiRepository
 {
     public const RESOURCE_NAME = 'operating-systems';
 
+    /**
+     * @return string[]
+     */
     protected function getRepositoryResourceNames(): array
     {
         return [VpsRepository::RESOURCE_NAME, self::RESOURCE_NAME];
@@ -57,6 +61,8 @@ class OperatingSystemRepository extends ApiRepository
      * @param string   $username
      * @param string[] $sshKeys
      * @param string[] $licenses
+     * @param string   $hashedPassword
+     * @param string   $acronisTenantId
      */
     public function install(
         string $vpsName,
@@ -66,15 +72,19 @@ class OperatingSystemRepository extends ApiRepository
         string $installFlavour = '',
         string $username = '',
         array $sshKeys = [],
-        array $licenses = []
-    ): void {
+        array $licenses = [],
+        string $hashedPassword = '',
+        string $acronisTenantId = ''
+    ): ResponseInterface {
         $parameters['operatingSystemName'] = $operatingSystemName;
         $parameters['hostname']            = $hostname;
         $parameters['base64InstallText']   = $base64InstallText;
         $parameters['installFlavour']      = $installFlavour;
         $parameters['username']            = $username;
+        $parameters['hashedPassword']      = $hashedPassword;
         $parameters['sshKeys']             = $sshKeys;
         $parameters['licenses']            = $licenses;
-        $this->httpClient->post($this->getResourceUrl($vpsName), $parameters);
+        $parameters['acronisTenantId']     = $acronisTenantId;
+        return $this->httpClient->post($this->getResourceUrl($vpsName), $parameters);
     }
 }

@@ -50,6 +50,11 @@ class Vps extends AbstractEntity
     protected $status;
 
     /**
+     * @var string $flavor
+     */
+    protected $flavor;
+
+    /**
      * @var string $ipAddress
      */
     protected $ipAddress;
@@ -90,9 +95,14 @@ class Vps extends AbstractEntity
     protected $availabilityZone;
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $tags;
+
+    /**
+     * @var string
+     */
+    protected $createdAt;
 
     public function getName(): string
     {
@@ -137,6 +147,11 @@ class Vps extends AbstractEntity
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    public function getFlavor(): string
+    {
+        return $this->flavor;
     }
 
     public function getIpAddress(): string
@@ -190,6 +205,9 @@ class Vps extends AbstractEntity
         $this->isCustomerLocked = $isCustomerLocked;
     }
 
+    /**
+     * @return string[]
+     */
     public function getTags(): array
     {
         return $this->tags;
@@ -206,5 +224,15 @@ class Vps extends AbstractEntity
     {
         $this->tags = array_diff($this->getTags(), [$tag]);
         return $this;
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(string $createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 }

@@ -14,6 +14,9 @@ class AuthRepository extends ApiRepository
      */
     protected $labelPrefix = 'api.lib-';
 
+    /**
+     * @return string[]
+     */
     protected function getRepositoryResourceNames(): array
     {
         return [self::RESOURCE_NAME];
@@ -26,7 +29,7 @@ class AuthRepository extends ApiRepository
         bool $readOnly = false,
         string $label = '',
         string $expirationTime = '1 day'
-    ): ?string {
+    ): string {
         if ($label === '') {
             $label = $this->getLabelPrefix() . time();
         }
@@ -42,9 +45,7 @@ class AuthRepository extends ApiRepository
 
         $signature = $this->createSignature($privateKey, $requestBody);
         $response  = $this->httpClient->postAuthentication($this->getResourceUrl(), $signature, $requestBody);
-        $token     = $this->getParameterFromResponse($response, 'token');
-
-        return $token;
+        return (string) $this->getParameterFromResponse($response, 'token');
     }
 
     public function tokenHasExpired(string $token): bool
@@ -71,7 +72,8 @@ class AuthRepository extends ApiRepository
 
         try {
             $data           = explode('.', $token);
-            $body           = json_decode(base64_decode($data[1]), true);
+            $payloadRaw     = $this->urlsafeB64Decode($data[1]);
+            $body           = json_decode($payloadRaw, true, 512, JSON_THROW_ON_ERROR);
             $expirationTime = $body['exp'] ?? 0;
         } catch (Exception $exception) {
             $expirationTime = 0;
@@ -80,6 +82,26 @@ class AuthRepository extends ApiRepository
         return intval($expirationTime);
     }
 
+    private function urlsafeB64Decode(string $input): string
+    {
+        return \base64_decode(self::convertBase64UrlToBase64($input));
+    }
+
+    private function convertBase64UrlToBase64(string $input): string
+    {
+        $remainder = \strlen($input) % 4;
+        if ($remainder) {
+            $padlen = 4 - $remainder;
+            $input .= \str_repeat('=', $padlen);
+        }
+        return \strtr($input, '-_', '+/');
+    }
+
+    /**
+     * @param string $privateKey
+     * @param mixed[] $parameters
+     * @return string
+     */
     private function createSignature(string $privateKey, array $parameters): string
     {
         // Fixup our private key, copy-pasting the key might lead to whitespace faults
@@ -87,18 +109,22 @@ class AuthRepository extends ApiRepository
             '/-----BEGIN (RSA )?PRIVATE KEY-----(.*)-----END (RSA )?PRIVATE KEY-----/si',
             $privateKey,
             $matches
-        )
-        ) {
+        )) {
             throw new RuntimeException('Could not find a valid private key');
         }
 
         $key = $matches[2];
         $key = preg_replace('/\s*/s', '', $key);
+        if ($key === null) {
+            throw new RuntimeException(
+                'The provided private key is invalid'
+            );
+        }
         $key = chunk_split($key, 64, "\n");
 
         $key = "-----BEGIN PRIVATE KEY-----\n" . $key . "-----END PRIVATE KEY-----";
 
-        if (!@openssl_sign(json_encode($parameters), $signature, $key, OPENSSL_ALGO_SHA512)) {
+        if (!@openssl_sign((string)json_encode($parameters), $signature, $key, OPENSSL_ALGO_SHA512)) {
             throw new RuntimeException(
                 'The provided private key is invalid'
             );

@@ -13,8 +13,8 @@ class SshKeyRepository extends ApiRepository
      */
     public function getAll(): array
     {
-        $sshKeys       = [];
-        $response      = $this->httpClient->get($this->getResourceUrl());
+        $sshKeys      = [];
+        $response     = $this->httpClient->get($this->getResourceUrl());
         $sshKeysArray = $this->getParameterFromResponse($response, 'sshKeys');
 
         foreach ($sshKeysArray as $sshKeyArray) {
@@ -24,6 +24,11 @@ class SshKeyRepository extends ApiRepository
         return $sshKeys;
     }
 
+    /**
+     * @param int $page
+     * @param int $itemsPerPage
+     * @return SshKey[]
+     */
     public function getSelection(int $page, int $itemsPerPage): array
     {
         $invoices     = [];
@@ -47,18 +52,29 @@ class SshKeyRepository extends ApiRepository
         return new SshKey($sshKeyArray);
     }
 
-    public function create(string $sshKey, string $sshKeyDescription): void
+    public function create(string $sshKey, string $sshKeyDescription, ?bool $isDefault = false): void
     {
         $this->httpClient->post($this->getResourceUrl(), [
             'sshKey'      => $sshKey,
             'description' => $sshKeyDescription,
+            'isDefault'   => $isDefault
         ]);
     }
 
     public function update(int $sshKeyId, string $sshKeyDescription): void
     {
-        $this->httpClient->put($this->getResourceUrl($sshKeyId), ['description' => $sshKeyDescription]);
+        // fetch current ssh key to preserve the current isDefault value. Needed to preserve backwards compatiblity
+        // for the sshkey:setdescription command.
+        $sshKey = $this->getById((string) $sshKeyId);
+        $sshKey->setDescription($sshKeyDescription);
+        $this->updateKey($sshKey);
     }
+
+    public function updateKey(SshKey $sshKey): void
+    {
+        $this->httpClient->put($this->getResourceUrl($sshKey->getId()), ['sshKey' => $sshKey]);
+    }
+
 
     public function delete(int $sshKeyId): void
     {

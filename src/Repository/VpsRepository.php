@@ -2,6 +2,7 @@
 
 namespace Transip\Api\Library\Repository;
 
+use Psr\Http\Message\ResponseInterface;
 use Transip\Api\Library\Entity\Vps;
 
 class VpsRepository extends ApiRepository
@@ -45,16 +46,29 @@ class VpsRepository extends ApiRepository
 
     public function getByName(string $name): Vps
     {
-        $response = $this->httpClient->get($this->getResourceUrl($name));
+        return $this->getByIdentifier($name);
+    }
+
+    /**
+     * @param string $identifier (vps name or vps uuid)
+     * @return Vps
+     */
+    public function getByIdentifier(string $identifier): Vps
+    {
+        $response = $this->httpClient->get($this->getResourceUrl($identifier));
         $vps      = $this->getParameterFromResponse($response, 'vps');
 
         return new Vps($vps);
     }
 
+    /**
+     * @param string[] $tags
+     * @return Vps[]
+     */
     public function getByTagNames(array $tags): array
     {
-        $tags      = implode(',', $tags);
-        $query     = ['tags' => $tags];
+        $tagString = implode(',', $tags);
+        $query     = ['tags' => $tagString];
         $response  = $this->httpClient->get($this->getResourceUrl(), $query);
         $vpssArray = $this->getParameterFromResponse($response, 'vpss');
 
@@ -69,7 +83,7 @@ class VpsRepository extends ApiRepository
     /**
      * @param string   $productName
      * @param string   $operatingSystemName
-     * @param array    $addons
+     * @param string[] $addons
      * @param string   $hostname
      * @param string   $availabilityZone
      * @param string   $description
@@ -78,10 +92,11 @@ class VpsRepository extends ApiRepository
      * @param string   $username
      * @param string[] $sshKeys
      * @param string[] $licenses
+     * @param string   $hashedPassword
      */
     public function order(
         string $productName,
-        string $operatingSystemName,
+        string $operatingSystemName = '',
         array $addons = [],
         string $hostname = '',
         string $availabilityZone = '',
@@ -90,10 +105,14 @@ class VpsRepository extends ApiRepository
         string $installFlavour = '',
         string $username = '',
         array $sshKeys = [],
-        array $licenses = []
-    ): void {
+        array $licenses = [],
+        string $hashedPassword = ''
+    ): ResponseInterface {
         $parameters['productName']     = $productName;
-        $parameters['operatingSystem'] = $operatingSystemName;
+
+        if ($operatingSystemName !== '') {
+            $parameters['operatingSystem'] = $operatingSystemName;
+        }
 
         if (!empty($addons)) {
             $parameters['addons'] = $addons;
@@ -116,6 +135,9 @@ class VpsRepository extends ApiRepository
         if ($username !== '') {
             $parameters['username'] = $username;
         }
+        if ($hashedPassword !== '') {
+            $parameters['hashedPassword'] = $hashedPassword;
+        }
         if ($sshKeys !== []) {
             $parameters['sshKeys'] = $sshKeys;
         }
@@ -123,7 +145,7 @@ class VpsRepository extends ApiRepository
             $parameters['licenses'] = $licenses;
         }
 
-        $this->httpClient->post($this->getResourceUrl(), $parameters);
+        return $this->httpClient->post($this->getResourceUrl(), $parameters);
     }
 
     /**
@@ -151,21 +173,21 @@ class VpsRepository extends ApiRepository
             ]
         ];
      *
-     * @param array $vpss
+     * @param mixed[] $vpss
      */
-    public function orderMultiple(array $vpss): void
+    public function orderMultiple(array $vpss): ResponseInterface
     {
-        $this->httpClient->post($this->getResourceUrl(), ['vpss' => $vpss]);
+        return $this->httpClient->post($this->getResourceUrl(), ['vpss' => $vpss]);
     }
 
-    public function cloneVps(string $vpsName, string $availabilityZone = ''): void
+    public function cloneVps(string $vpsName, string $availabilityZone = ''): ResponseInterface
     {
         $parameters['vpsName'] = $vpsName;
         if ($availabilityZone !== '') {
             $parameters['availabilityZone'] = $availabilityZone;
         }
 
-        $this->httpClient->post($this->getResourceUrl(), $parameters);
+        return $this->httpClient->post($this->getResourceUrl(), $parameters);
     }
 
     public function update(Vps $vps): void
@@ -173,9 +195,9 @@ class VpsRepository extends ApiRepository
         $this->httpClient->put($this->getResourceUrl($vps->getName()), ['vps' => $vps]);
     }
 
-    public function start(string $vpsName): void
+    public function start(string $vpsName): ResponseInterface
     {
-        $this->httpClient->patch($this->getResourceUrl($vpsName), ['action' => 'start']);
+        return $this->httpClient->patch($this->getResourceUrl($vpsName), ['action' => 'start']);
     }
 
     public function stop(string $vpsName): void

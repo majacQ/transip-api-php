@@ -15,6 +15,10 @@ use Transip\Api\Library\Exception\HttpRequestException;
 use Transip\Api\Library\Exception\HttpBadResponseException;
 use Transip\Api\Library\HttpClient\Middleware\TokenAuthorization;
 
+/**
+ * @deprecated This client is deprecated in favour of HttpMethodsClient which supports more client libraries
+ * @see HttpMethodsClient
+ */
 class GuzzleClient extends HttpClient
 {
     /**
@@ -39,6 +43,12 @@ class GuzzleClient extends HttpClient
         $this->token = $token;
     }
 
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param mixed[]  $options
+     * @return ResponseInterface
+     */
     private function sendRequest(string $method, string $uri, array $options = []): ResponseInterface
     {
         try {
@@ -50,6 +60,13 @@ class GuzzleClient extends HttpClient
         }
     }
 
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param mixed[]  $options
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return ResponseInterface
+     */
     private function request(string $method, string $uri, array $options = []): ResponseInterface
     {
         $this->checkAndRenewToken();
@@ -62,6 +79,11 @@ class GuzzleClient extends HttpClient
         }
     }
 
+    /**
+     * @param string $uri
+     * @param mixed[] $query
+     * @return mixed[]
+     */
     public function get(string $uri, array $query = []): array
     {
         $response = $this->sendRequest('GET', $uri, ['query' => $query]);
@@ -70,7 +92,7 @@ class GuzzleClient extends HttpClient
             throw ApiException::unexpectedStatusCode($response);
         }
 
-        if ($response->getBody() == null) {
+        if (!(string)$response->getBody()) {
             throw ApiException::emptyResponse($response);
         }
 
@@ -85,7 +107,12 @@ class GuzzleClient extends HttpClient
         return $responseBody;
     }
 
-    public function post(string $uri, array $body = []): void
+    /**
+     * @param string $uri
+     * @param mixed[] $body
+     * @return ResponseInterface
+     */
+    public function post(string $uri, array $body = []): ResponseInterface
     {
         $options['body'] = json_encode($body);
 
@@ -96,8 +123,47 @@ class GuzzleClient extends HttpClient
         }
 
         $this->parseResponseHeaders($response);
+
+        return $response;
     }
 
+    /**
+     * @param string $uri
+     * @param mixed[] $body
+     * @return mixed[]
+     */
+    public function postWithResponse(string $uri, array $body = []): array
+    {
+        $options['body'] = json_encode($body);
+
+        $response = $this->sendRequest('POST', $uri, $options);
+
+        if ($response->getStatusCode() !== 201) {
+            throw ApiException::unexpectedStatusCode($response);
+        }
+
+        if (!(string)$response->getBody()) {
+            throw ApiException::expectedBodyFromPost($response);
+        }
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if ($responseBody === null) {
+            throw ApiException::malformedJsonResponse($response);
+        }
+
+        $this->parseResponseHeaders($response);
+
+        return $responseBody;
+    }
+
+    /**
+     * @param string $uri
+     * @param string $signature
+     * @param mixed[] $body
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return mixed[]
+     */
     public function postAuthentication(string $uri, string $signature, array $body): array
     {
         $options['headers'] = ['Signature' => $signature];
@@ -113,7 +179,7 @@ class GuzzleClient extends HttpClient
             throw ApiException::unexpectedStatusCode($response);
         }
 
-        if ($response->getBody() == null) {
+        if (!(string)$response->getBody()) {
             throw ApiException::emptyResponse($response);
         }
 
@@ -126,7 +192,12 @@ class GuzzleClient extends HttpClient
         return $responseBody;
     }
 
-    public function put(string $uri, array $body): void
+    /**
+     * @param string $uri
+     * @param mixed[] $body
+     * @return ResponseInterface
+     */
+    public function put(string $uri, array $body): ResponseInterface
     {
         $options['body'] = json_encode($body);
 
@@ -137,9 +208,16 @@ class GuzzleClient extends HttpClient
         }
 
         $this->parseResponseHeaders($response);
+
+        return $response;
     }
 
-    public function patch(string $uri, array $body): void
+    /**
+     * @param string $uri
+     * @param mixed[] $body
+     * @return ResponseInterface
+     */
+    public function patch(string $uri, array $body): ResponseInterface
     {
         $options['body'] = json_encode($body);
 
@@ -150,8 +228,15 @@ class GuzzleClient extends HttpClient
         }
 
         $this->parseResponseHeaders($response);
+
+        return $response;
     }
 
+    /**
+     * @param string $uri
+     * @param mixed[] $body
+     * @return void
+     */
     public function delete(string $uri, array $body = []): void
     {
         $options['body'] = json_encode($body);
@@ -165,6 +250,11 @@ class GuzzleClient extends HttpClient
         $this->parseResponseHeaders($response);
     }
 
+    /**
+     * @param Exception $exception
+     * @throws \RuntimeException
+     * @return never
+     */
     private function handleException(Exception $exception): void
     {
         if ($exception instanceof BadResponseException) {
@@ -182,9 +272,13 @@ class GuzzleClient extends HttpClient
         throw HttpClientException::genericRequestException($exception);
     }
 
+    /**
+     * @param mixed[] $options
+     * @return mixed[]
+     */
     private function checkAndSetTestModeToOptions(array $options): array
     {
-        if ($this->testMode == false) {
+        if (!$this->testMode) {
             return $options;
         }
 

@@ -2,6 +2,9 @@
 
 namespace Transip\Api\Library\Entity;
 
+use Transip\Api\Library\Entity\Domain\Nameserver;
+use Transip\Api\Library\Entity\Domain\WhoisContact;
+
 class Domain extends AbstractEntity
 {
     /**
@@ -55,9 +58,78 @@ class Domain extends AbstractEntity
     protected $hasAutoDns;
 
     /**
-     * @var array $tags
+     * @var string $status
+     */
+    protected $status = '';
+
+    /**
+     * @var boolean $hasDnsSec
+     */
+    protected $hasDnsSec = true;
+
+    /**
+     * @var boolean $canEditDns
+     */
+    protected $canEditDns = false;
+
+    /**
+     * @var string[] $tags
      */
     protected $tags = [];
+
+    /**
+     * @var Nameserver[] $nameservers
+     */
+    protected $nameservers = [];
+
+    /**
+     * @var WhoisContact[] $contacts
+     */
+    protected $contacts = [];
+
+    /**
+     * @param mixed[] $valueArray
+     */
+    public function __construct(array $valueArray = [])
+    {
+        foreach ($valueArray as $field => $value) {
+            if ($field === 'nameservers') {
+                $this->initNameservers($value);
+                continue;
+            }
+
+            if ($field === 'contacts') {
+                $this->initContacts($value);
+                continue;
+            }
+
+            if (property_exists($this, $field)) {
+                $this->$field = $value;
+            }
+        }
+    }
+
+    /**
+     * @param mixed[] $nameservers
+     * @return void
+     */
+    private function initNameservers(array $nameservers = []): void
+    {
+        $this->nameservers = array_map(static function ($nameserver) {
+            return new Nameserver(($nameserver));
+        }, $nameservers);
+    }
+
+    /**
+     * @param mixed[] $contacts
+     * @return void
+     */
+    private function initContacts(array $contacts = []): void
+    {
+        $this->contacts = array_map(static function ($contact) {
+            return new WhoisContact($contact);
+        }, $contacts);
+    }
 
     public function getName(): string
     {
@@ -104,6 +176,9 @@ class Domain extends AbstractEntity
         return $this->isDnsOnly;
     }
 
+    /**
+     * @return string[]
+     */
     public function getTags(): array
     {
         return $this->tags;
@@ -121,6 +196,10 @@ class Domain extends AbstractEntity
         return $this;
     }
 
+    /**
+     * @param string[] $tags
+     * @return self
+     */
     public function setTags(array $tags): Domain
     {
         $this->tags = $tags;
@@ -148,5 +227,69 @@ class Domain extends AbstractEntity
     public function setHasAutoDns(bool $hasAutoDns): void
     {
         $this->hasAutoDns = $hasAutoDns;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return Nameserver[]
+     */
+    public function getNameservers(): array
+    {
+        return $this->nameservers;
+    }
+
+    /**
+     * @param Nameserver[] $nameservers
+     */
+    public function setNameservers(array $nameservers): void
+    {
+        $this->nameservers = $nameservers;
+    }
+
+    /**
+     * @return WhoisContact[]
+     */
+    public function getContacts(): array
+    {
+        return $this->contacts;
+    }
+
+    /**
+     * @param WhoisContact[] $contacts
+     */
+    public function setContacts(array $contacts): void
+    {
+        $this->contacts = $contacts;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHasDnsSec(): bool
+    {
+        return $this->hasDnsSec;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCanEditDns(): bool
+    {
+        return $this->canEditDns;
     }
 }

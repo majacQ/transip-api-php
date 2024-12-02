@@ -39,6 +39,27 @@ class OpenStackProject extends AbstractEntity
      */
     protected $isBlocked;
 
+    /**
+     * Indicates whether the project is of type `objectstore` or `openstack`
+     *
+     * @var string
+     */
+    protected $type;
+
+    /**
+     * The domain in which a project is stored
+     *
+     * @var string
+     */
+    protected $domain;
+
+    /**
+     * The region in which a project is stored
+     *
+     * @var string
+     */
+    protected $region;
+
     public function getId(): string
     {
         return $this->id;
@@ -64,6 +85,16 @@ class OpenStackProject extends AbstractEntity
         return $this->isBlocked;
     }
 
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getDomain(): string
+    {
+        return $this->domain;
+    }
+
     public function setName(string $name): void
     {
         $this->name = $name;
@@ -72,5 +103,10 @@ class OpenStackProject extends AbstractEntity
     public function setDescription(string $description): void
     {
         $this->description = $description;
+    }
+
+    public function getRegion(): string
+    {
+        return $this->region;
     }
 }
