@@ -10,6 +10,10 @@ class UsageRepository extends ApiRepository
 {
     public const RESOURCE_NAME = 'usage';
 
+    /**
+     * @return array|string[]
+     * @deprecated
+     */
     protected function getRepositoryResourceNames(): array
     {
         return [BigStorageRepository::RESOURCE_NAME, self::RESOURCE_NAME];
@@ -20,6 +24,7 @@ class UsageRepository extends ApiRepository
      * @param int    $dateTimeStart
      * @param int    $dateTimeEnd
      * @return UsageDataDisk[]
+     * @deprecated Use block storage resource instead
      */
     public function getUsageStatistics(
         string $bigStorageName,

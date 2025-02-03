@@ -21,6 +21,11 @@ class OperatingSystem extends AbstractEntity
     protected $description;
 
     /**
+     * @var string $baseName
+     */
+    protected $baseName;
+
+    /**
      * @var string $version
      */
     protected $version;
@@ -40,6 +45,19 @@ class OperatingSystem extends AbstractEntity
      */
     protected $licenses = [];
 
+    /**
+     * @var string[]
+     */
+    protected $installFields = [];
+
+    /**
+     * @var boolean
+     */
+    protected $isDefault = false;
+
+    /**
+     * @param mixed[] $valueArray
+     */
     public function __construct(array $valueArray = [])
     {
         $licenses = $valueArray['licenses'] ?? [];
@@ -69,6 +87,11 @@ class OperatingSystem extends AbstractEntity
         return in_array(self::INSTALL_FLAVOUR_PREINSTALLABLE, $this->getInstallFlavours(), true);
     }
 
+    public function getBaseName(): string
+    {
+        return $this->baseName;
+    }
+
     public function getVersion(): string
     {
         return $this->version;
@@ -79,6 +102,9 @@ class OperatingSystem extends AbstractEntity
         return $this->price;
     }
 
+    /**
+     * @return string[]
+     */
     public function getInstallFlavours(): array
     {
         return $this->installFlavours;
@@ -90,5 +116,10 @@ class OperatingSystem extends AbstractEntity
     public function getLicenses(): array
     {
         return $this->licenses;
+    }
+
+    public function getIsDefault(): bool
+    {
+        return $this->isDefault;
     }
 }

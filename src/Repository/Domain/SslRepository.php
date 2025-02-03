@@ -2,7 +2,7 @@
 
 namespace Transip\Api\Library\Repository\Domain;
 
-use Transip\Api\Library\Entity\Domain\SslCertificate;
+use Transip\Api\Library\Entity\SslCertificate;
 use Transip\Api\Library\Repository\ApiRepository;
 use Transip\Api\Library\Repository\DomainRepository;
 
@@ -10,6 +10,9 @@ class SslRepository extends ApiRepository
 {
     public const RESOURCE_NAME = 'ssl';
 
+    /**
+     * @return string[]
+     */
     protected function getRepositoryResourceNames(): array
     {
         return [DomainRepository::RESOURCE_NAME, self::RESOURCE_NAME];
@@ -17,7 +20,7 @@ class SslRepository extends ApiRepository
 
     /**
      * @param string $domainName
-     * @return SslCertificate[]
+     * @return \Transip\Api\Library\Entity\SslCertificate[]
      */
     public function getByDomainName(string $domainName): array
     {
@@ -26,7 +29,7 @@ class SslRepository extends ApiRepository
         $sslCertificatesArray = $this->getParameterFromResponse($response, 'certificates');
 
         foreach ($sslCertificatesArray as $sslCertificateArray) {
-            $sslCertificates[] = new SslCertificate($sslCertificateArray);
+            $sslCertificates[] = new \Transip\Api\Library\Entity\SslCertificate($sslCertificateArray);
         }
 
         return $sslCertificates;

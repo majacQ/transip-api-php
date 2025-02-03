@@ -2,6 +2,7 @@
 
 namespace Transip\Api\Library\Repository;
 
+use Psr\Http\Message\ResponseInterface;
 use Transip\Api\Library\Entity\BigStorage;
 
 class BigStorageRepository extends ApiRepository
@@ -10,6 +11,7 @@ class BigStorageRepository extends ApiRepository
 
     /**
      * @return BigStorage[]
+     * @deprecated Use block storage resource instead
      */
     public function getAll(): array
     {
@@ -28,6 +30,7 @@ class BigStorageRepository extends ApiRepository
      * @param int $page
      * @param int $itemsPerPage
      * @return BigStorage[]
+     * @deprecated Use block storage resource instead
      */
     public function getSelection(int $page, int $itemsPerPage): array
     {
@@ -44,6 +47,9 @@ class BigStorageRepository extends ApiRepository
         return $bigStorages;
     }
 
+    /**
+     * @deprecated Use block storage resource instead
+     */
     public function getByName(string $privateNetworkName): BigStorage
     {
         $response        = $this->httpClient->get($this->getResourceUrl($privateNetworkName));
@@ -52,13 +58,16 @@ class BigStorageRepository extends ApiRepository
         return new BigStorage($bigStorageArray);
     }
 
+    /**
+     * @deprecated Use block storage resource instead
+     */
     public function order(
         string $size,
         bool $offsiteBackup = true,
         string $availabilityZone = '',
         string $vpsName = '',
         string $description = ''
-    ): void {
+    ): ResponseInterface {
         $parameters = [
             'size'             => $size,
             'offsiteBackups'   => $offsiteBackup,
@@ -66,10 +75,13 @@ class BigStorageRepository extends ApiRepository
             'vpsName'          => $vpsName,
             'description'      => $description,
         ];
-        $this->httpClient->post($this->getResourceUrl(), $parameters);
+        return $this->httpClient->post($this->getResourceUrl(), $parameters);
     }
 
-    public function upgrade(string $bigStorageName, int $size, ?Bool $offsiteBackups = null)
+    /**
+     * @deprecated Use block storage resource instead
+     */
+    public function upgrade(string $bigStorageName, int $size, ?Bool $offsiteBackups = null): void
     {
         $parameters = [
             'bigStorageName'   => $bigStorageName,
@@ -83,14 +95,20 @@ class BigStorageRepository extends ApiRepository
         $this->httpClient->post($this->getResourceUrl(), $parameters);
     }
 
-    public function update(BigStorage $bigStorage): void
+    /**
+     * @deprecated Use block storage resource instead
+     */
+    public function update(BigStorage $bigStorage): ResponseInterface
     {
-        $this->httpClient->put(
+        return $this->httpClient->put(
             $this->getResourceUrl($bigStorage->getName()),
             ['bigStorage' => $bigStorage]
         );
     }
 
+    /**
+     * @deprecated Use block storage resource instead
+     */
     public function cancel(string $vpsName, string $endTime): void
     {
         $this->httpClient->delete($this->getResourceUrl($vpsName), ['endTime' => $endTime]);

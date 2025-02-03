@@ -2,8 +2,8 @@
 
 namespace Transip\Api\Library\HttpClient;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Transip\Api\Library\Repository\AuthRepository;
 use Transip\Api\Library\TransipAPI;
 
@@ -44,7 +44,7 @@ abstract class HttpClient implements HttpClientInterface
     protected $generateWhitelistOnlyTokens = false;
 
     /**
-     * @var AdapterInterface
+     * @var CacheItemPoolInterface
      */
     protected $cache;
 
@@ -85,7 +85,7 @@ abstract class HttpClient implements HttpClientInterface
         $this->authRepository = new AuthRepository($this);
     }
 
-    public function setCache(AdapterInterface $cache): void
+    public function setCache(CacheItemPoolInterface $cache): void
     {
         $this->cache = $cache;
     }
@@ -141,9 +141,13 @@ abstract class HttpClient implements HttpClientInterface
 
     protected function parseResponseHeaders(ResponseInterface $response): void
     {
-        $this->rateLimitLimit     = $response->getHeader("X-Rate-Limit-Limit")[0] ?? -1;
-        $this->rateLimitRemaining = $response->getHeader("X-Rate-Limit-Remaining")[0] ?? -1;
-        $this->rateLimitReset     = $response->getHeader("X-Rate-Limit-Reset")[0] ?? -1;
+        $rateLimitLimit     = $response->getHeader("X-Rate-Limit-Limit")[0] ?? -1;
+        $rateLimitRemaining = $response->getHeader("X-Rate-Limit-Remaining")[0] ?? -1;
+        $rateLimitReset     = $response->getHeader("X-Rate-Limit-Reset")[0] ?? -1;
+
+        $this->rateLimitLimit     = (int) $rateLimitLimit;
+        $this->rateLimitRemaining = (int) $rateLimitRemaining;
+        $this->rateLimitReset     = (int) $rateLimitReset;
     }
 
     private function getFingerPrintFromKey(string $privateKey): string
@@ -254,10 +258,54 @@ abstract class HttpClient implements HttpClientInterface
     }
 
     abstract public function setToken(string $token): void;
+
+    /**
+     * @param string $url
+     * @param mixed[]  $query
+     * @return mixed[]
+     */
     abstract public function get(string $url, array $query = []): array;
-    abstract public function post(string $url, array $body = []): void;
+
+    /**
+     * @param string $url
+     * @param mixed[] $body
+     * @return ResponseInterface
+     */
+    abstract public function post(string $url, array $body = []): ResponseInterface;
+
+    /**
+     * @param string $url
+     * @param mixed[] $body
+     * @return mixed[]
+     */
+    abstract public function postWithResponse(string $url, array $body = []): array;
+
+    /**
+     * @param string $url
+     * @param string $signature
+     * @param mixed[] $body
+     * @return mixed[]
+     */
     abstract public function postAuthentication(string $url, string $signature, array $body): array;
-    abstract public function put(string $url, array $body): void;
-    abstract public function patch(string $url, array $body): void;
+
+    /**
+     * @param string $url
+     * @param mixed[] $body
+     * @return ResponseInterface
+     */
+    abstract public function put(string $url, array $body): ResponseInterface;
+
+    /**
+     * @param string $url
+     * @param mixed[] $body
+     * @return ResponseInterface
+     */
+    abstract public function patch(string $url, array $body): ResponseInterface;
+
+    /**
+     * @param string $url
+     * @param mixed[] $body
+     * @return void
+     */
     abstract public function delete(string $url, array $body = []): void;
 }
