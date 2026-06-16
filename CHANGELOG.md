@@ -1,5 +1,8 @@
 CHANGELOG
 =========
+6.54.7
+-----
+* Add description to licences
 6.54.6
 -----
 * Remove method parameter trailing comma
