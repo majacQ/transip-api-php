@@ -9,6 +9,9 @@ class LicenseProduct extends AbstractEntity
     /** @var string */
     protected $name;
 
+    /** @var string */
+    protected $description;
+
     /** @var int */
     protected $price;
 
@@ -30,6 +33,11 @@ class LicenseProduct extends AbstractEntity
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
     }
 
     public function getPrice(): int
