@@ -2,6 +2,7 @@
 
 namespace Transip\Api\Library\HttpClient;
 
+use DateTimeZone;
 use Psr\Http\Message\ResponseInterface;
 
 interface HttpClientInterface
@@ -85,6 +86,9 @@ interface HttpClientInterface
     public function getTestMode(): bool;
 
     public function setTestMode(bool $testMode): void;
+
+    public function getTimeZone(): string;
+    public function setTimeZone(DateTimeZone $timezone): void;
 
     public function getRateLimitLimit(): int;
 

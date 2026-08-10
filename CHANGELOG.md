@@ -1,5 +1,8 @@
 CHANGELOG
 =========
+6.54.8
+-----
+* Add optional Time-Zone header
 6.54.7
 -----
 * Add description to licences
