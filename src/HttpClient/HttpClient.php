@@ -2,6 +2,7 @@
 
 namespace Transip\Api\Library\HttpClient;
 
+use DateTimeZone;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Transip\Api\Library\Repository\AuthRepository;
@@ -57,6 +58,11 @@ abstract class HttpClient implements HttpClientInterface
      * @var bool
      */
     protected $testMode = false;
+
+    /**
+     * @var string
+     */
+    protected $timezone = 'Europe/Amsterdam';
 
     /**
      * @var int
@@ -209,6 +215,15 @@ abstract class HttpClient implements HttpClientInterface
     public function getReadOnlyMode(): bool
     {
         return $this->readOnlyMode;
+    }
+    public function getTimezone(): string
+    {
+        return $this->timezone;
+    }
+
+    public function setTimeZone(DateTimeZone $timezone): void
+    {
+        $this->timezone = $timezone->getName();
     }
 
     /**

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Transip\Api\Library\HttpClient;
 
+use DateTimeZone;
 use Exception;
 use Http\Client\Common\Plugin;
+use Http\Client\Common\Plugin\HeaderAppendPlugin;
 use Http\Client\Exception\RequestException;
 use Http\Discovery\Psr17FactoryDiscovery;
 use LogicException;
@@ -243,5 +245,13 @@ final class HttpMethodsClient extends HttpClient
         }
 
         throw HttpClientException::genericRequestException($exception);
+    }
+
+    public function setTimeZone(DateTimeZone $timezone): void
+    {
+        $this->timezone = $timezone->getName();
+        $header = ['Time-Zone' => $timezone->getName()];
+        $this->client->addplugin(new Plugin\HeaderRemovePlugin(['Time-Zone']));
+        $this->client->addplugin(new Plugin\HeaderAppendPlugin($header));
     }
 }
