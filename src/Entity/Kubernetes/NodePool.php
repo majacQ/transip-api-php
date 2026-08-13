@@ -27,6 +27,21 @@ class NodePool extends AbstractEntity
     protected $desiredNodeCount;
 
     /**
+     * @var bool
+     */
+    protected $autoscalingEnabled;
+
+    /**
+     * @var int
+     */
+    protected $minNodeCount;
+
+    /**
+     * @var int
+     */
+    protected $maxNodeCount;
+
+    /**
      * @var string
      */
     protected $nodeSpec;
@@ -87,6 +102,36 @@ class NodePool extends AbstractEntity
     public function setDesiredNodeCount(int $desiredNodeCount): void
     {
         $this->desiredNodeCount = $desiredNodeCount;
+    }
+
+    public function getAutoscalingEnabled(): bool
+    {
+        return $this->autoscalingEnabled;
+    }
+
+    public function setAutoscalingEnabled(bool $autoscalingEnabled): void
+    {
+        $this->autoscalingEnabled = $autoscalingEnabled;
+    }
+
+    public function getMinNodeCount(): int
+    {
+        return $this->minNodeCount;
+    }
+
+    public function setMinNodeCount(int $minNodeCount): void
+    {
+        $this->minNodeCount = $minNodeCount;
+    }
+
+    public function getMaxNodeCount(): int
+    {
+        return $this->maxNodeCount;
+    }
+
+    public function setMaxNodeCount(int $maxNodeCount): void
+    {
+        $this->maxNodeCount = $maxNodeCount;
     }
 
     public function getNodeSpec(): string

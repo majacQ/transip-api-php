@@ -96,4 +96,20 @@ class NodePoolRepository extends ApiRepository
     {
         $this->httpClient->delete($this->getResourceUrl($clusterName, $nodePoolUuid));
     }
+
+    /**
+     * @param string $clusterName
+     * @param string $nodePoolUuid
+     * @param string[] $nodeUuids
+     */
+    public function removeNodes(string $clusterName, string $nodePoolUuid, array $nodeUuids): void
+    {
+        $this->httpClient->patch(
+            $this->getResourceUrl($clusterName, $nodePoolUuid),
+            [
+                'action' => 'remove_nodes',
+                'nodes'  => $nodeUuids,
+            ]
+        );
+    }
 }
