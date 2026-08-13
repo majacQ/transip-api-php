@@ -87,4 +87,9 @@ class NodeRepository extends ApiRepository
     {
         $this->httpClient->patch($this->getResourceUrl($clusterName, $nodeUuid), ['action' => 'reboot']);
     }
+
+    public function remove(string $clusterName, string $nodeUuid): void
+    {
+        $this->httpClient->delete($this->getResourceUrl($clusterName, $nodeUuid));
+    }
 }
