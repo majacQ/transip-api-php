@@ -1,16 +1,23 @@
 CHANGELOG
 =========
+6.54.10
+-----
+* Add autoscaling support to nodepool create
+
 6.54.9
 -----
 * Add `autoscalingEnabled`, `minNodeCount` and `maxNodeCount` fields to Kubernetes `NodePool`
 * Add `removeNodes` method to Kubernetes `NodePoolRepository`
 * Add `remove` method to Kubernetes `NodeRepository`
+
 6.54.8
 -----
 * Add optional Time-Zone header
+
 6.54.7
 -----
 * Add description to licences
+
 6.54.6
 -----
 * Remove method parameter trailing comma

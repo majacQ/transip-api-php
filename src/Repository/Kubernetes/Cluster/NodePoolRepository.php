@@ -70,7 +70,10 @@ class NodePoolRepository extends ApiRepository
         int $desiredNodeCount,
         string $nodeSpec,
         string $availabilityZone,
-        ?string $description = null
+        ?string $description = null,
+        ?bool $autoscalingEnabled = null,
+        ?int $minNodeCount = null,
+        ?int $maxNodeCount = null
     ): void {
         $parameters['clusterName']      = $clusterName;
         $parameters['desiredNodeCount'] = $desiredNodeCount;
@@ -79,6 +82,18 @@ class NodePoolRepository extends ApiRepository
 
         if ($description !== null) {
             $parameters['description'] = $description;
+        }
+
+        if ($autoscalingEnabled !== null) {
+            $parameters['autoscalingEnabled'] = $autoscalingEnabled;
+        }
+
+        if ($minNodeCount !== null) {
+            $parameters['minNodeCount'] = $minNodeCount;
+        }
+
+        if ($maxNodeCount !== null) {
+            $parameters['maxNodeCount'] = $maxNodeCount;
         }
 
         $this->httpClient->post($this->getResourceUrl($clusterName), $parameters);
